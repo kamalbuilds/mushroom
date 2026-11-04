@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mushroom Cultivation Business — Master Plan & Tracker</title>
+<style>
+:root{
+  --green:#1b5e20; --green2:#2e7d32; --light:#e8f5e9; --amber:#f9a825;
+  --bg:#f4f6f4; --card:#ffffff; --ink:#1c2b1e; --muted:#5c6f60;
+  --red:#c62828; --blue:#1565c0; --grey:#e0e0e0;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55;}
+header{background:linear-gradient(135deg,var(--green),var(--green2)); color:#fff; padding:22px 28px;}
+header h1{font-size:1.5rem;}
+header p{opacity:.9; font-size:.9rem; margin-top:4px;}
+nav{display:flex; flex-wrap:wrap; background:#123c17; padding:0 10px; position:sticky; top:0; z-index:50;}
+nav button{background:none; border:none; color:#cfe3d1; padding:13px 16px; cursor:pointer; font-size:.88rem; font-weight:600;}
+nav button:hover{background:rgba(255,255,255,.08); color:#fff;}
+nav button.active{background:var(--green2); color:#fff;}
+.page{display:none; padding:26px; max-width:1200px; margin:0 auto;}
+.page.active{display:block;}
+h2{color:var(--green); border-bottom:3px solid var(--green2); padding-bottom:8px; margin-bottom:16px; font-size:1.3rem;}
+h3{color:var(--green2); margin:20px 0 10px; font-size:1.05rem;}
+.card{background:var(--card); border-radius:10px; padding:18px 20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,.08);}
+table{width:100%; border-collapse:collapse; font-size:.86rem; margin:10px 0;}
+th{background:var(--green); color:#fff; padding:9px 10px; text-align:left; font-size:.8rem; text-transform:uppercase; letter-spacing:.4px;}
+td{padding:8px 10px; border-bottom:1px solid var(--grey); vertical-align:top;}
+tr:nth-child(even) td{background:#fafcfa;}
+a{color:var(--blue); word-break:break-all;}
+.tag{display:inline-block; background:var(--light); color:var(--green); border-radius:12px; padding:2px 10px; font-size:.75rem; font-weight:600; margin:2px 4px 2px 0;}
+.note{background:#fff8e1; border-left:4px solid var(--amber); padding:12px 14px; border-radius:6px; margin:12px 0; font-size:.88rem;}
+.warn{background:#ffebee; border-left:4px solid var(--red); padding:12px 14px; border-radius:6px; margin:12px 0; font-size:.88rem;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media(max-width:820px){.grid2{grid-template-columns:1fr;}}
+ol,ul{margin-left:20px; font-size:.9rem;}
+li{margin-bottom:6px;}
+
+/* Tracker & Kanban */
+.kanban{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+@media(max-width:820px){.kanban{grid-template-columns:1fr;}}
+.kcol{background:#eef2ee; border-radius:10px; padding:10px; min-height:340px;}
+.kcol h4{text-align:center; padding:6px; border-radius:6px; color:#fff; margin-bottom:10px; font-size:.85rem;}
+.kcol.todo h4{background:#757575;} .kcol.doing h4{background:var(--amber);} .kcol.done h4{background:var(--green2);}
+.kcard{background:#fff; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:.83rem; box-shadow:0 1px 3px rgba(0,0,0,.12); cursor:grab;}
+.kcard small{color:var(--muted); display:block; margin-top:4px;}
+.kcard.dragging{opacity:.4;}
+select,input[type=text],input[type=number],input[type=date],textarea{padding:7px 9px; border:1px solid #b9c6bb; border-radius:6px; font-size:.85rem; width:100%; font-family:inherit;}
+.btn{background:var(--green2); color:#fff; border:none; padding:9px 16px; border-radius:6px; cursor:pointer; font-size:.85rem; font-weight:600;}
+.btn:hover{background:var(--green);}
+.btn.ghost{background:#fff; color:var(--green2); border:1.5px solid var(--green2);}
+.btn.danger{background:#fff; color:var(--red); border:1.5px solid var(--red); padding:4px 9px; font-size:.75rem;}
+.status-s{background:#e3f2fd;} .status-p{background:#fff8e1;} .status-c{background:#e8f5e9;}
+
+/* Calculator */
+.calc-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+@media(max-width:820px){.calc-grid{grid-template-columns:1fr;}}
+.field{margin-bottom:12px;}
+.field label{display:block; font-size:.8rem; font-weight:600; color:var(--muted); margin-bottom:4px;}
+.field .unit{position:relative;}
+.field .unit span{position:absolute; right:10px; top:7px; font-size:.78rem; color:var(--muted);}
+.out{background:var(--light); border-radius:8px; padding:12px 14px; display:flex; justify-content:space-between; margin-bottom:10px; font-size:.9rem;}
+.out b{font-size:1rem; color:var(--green);}
+.big{font-size:1.5rem !important;}
+.kpi-row{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;}
+@media(max-width:820px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+.kpi{background:#fff; border-radius:10px; padding:14px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.kpi .v{font-size:1.3rem; font-weight:700; color:var(--green);}
+.kpi .l{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+.pos{color:var(--green)!important;} .neg{color:var(--red)!important;}
+.cal-month{background:#fff; border-radius:8px; padding:10px 12px; font-size:.8rem; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:10px; border-top:4px solid var(--green2);}
+.cal-month h5{font-size:.85rem; color:var(--green); margin-bottom:4px;}
+.cal-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+@media(max-width:1000px){.cal-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.cal-grid{grid-template-columns:1fr;}}
+footer{text-align:center; color:var(--muted); font-size:.78rem; padding:24px;}
+@media print{ nav,.btn,.noprint{display:none!important;} .page{display:block!important; page-break-before:always;} body{background:#fff;} }
+</style>
+<base target="_blank">
+</head>
+<body>
+<header>
+  <h1>🍄 Mushroom Cultivation Business — Master Plan & Team Tracker</h1>
+  <p>Bihar (village unit, 200 m² land) + Bangalore unit · Nepal export · Hotel/HoReCa sales · Prepared Nov 2026</p>
+</header>
+
+<nav id="tabs">
+  <button class="active" data-p="p1">1 · Resources</button>
+  <button data-p="p2">2 · Bihar Plan</button>
+  <button data-p="p3">3 · Bangalore Plan</button>
+  <button data-p="p4">4 · Nepal Export & Sales</button>
+  <button data-p="p5">5 · 12-Month Calendar</button>
+  <button data-p="p6">6 · Kanban Board</button>
+  <button data-p="p7">7 · Team Tracker</button>
+  <button data-p="p8">8 · Profit Calculator</button>
+</nav>
+
+<!-- PAGE 1: RESOURCES -->
+<div class="page active" id="p1">
+  <h2>1 · Key Resources & Websites</h2>
+  <div class="card">
+    <h3>Government Research & Training Institutes</h3>
+    <table>
+      <tr><th>Institute</th><th>Location</th><th>What it offers</th></tr>
+      <tr><td><b>ICAR-DMR</b><br>dmrsolan.res.in</td><td>Solan, HP</td><td>National authority. Residential trainings (2 batches/yr), quality spawn, tech bulletins, AICRP centres in 27 states.</td></tr>
+      <tr><td><b>ICAR-IIHR Mushroom Lab</b><br>mushroom.iihr.res.in</td><td>Bengaluru</td><td>Best for South India. Spawn production + cultivation trainings, Ready-to-Fruit bags, licensed tech (shiitake, milky, reishi). Jan batches prioritise out-of-state candidates.</td></tr>
+      <tr><td><b>RPCAU Pusa</b><br>rpcau.ac.in</td><td>Samastipur, Bihar</td><td>Low-cost rural mushroom tech; regular farmer trainings — go here for the Bihar unit.</td></tr>
+      <tr><td><b>BAU Sabour</b></td><td>Bhagalpur, Bihar</td><td>Extension services & training for horticultural species.</td></tr>
+      <tr><td><b>HAIC Murthal</b></td><td>Sonepat, HR</td><td>Commercial-scale button mushroom training.</td></tr>
+      <tr><td><b>KVKs</b></td><td>Patna, Muzaffarpur, Bhagalpur, GKVK Bengaluru</td><td>Short, cheap local trainings; entry point for the Bihar subsidy scheme.</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Subsidy & Scheme Portals</h3>
+    <table>
+      <tr><th>Portal</th><th>Scheme</th><th>Benefit</th></tr>
+      <tr><td>horticulture.bihar.gov.in</td><td>Bihar Mushroom Development Scheme</td><td>50% DBT subsidy; priority for women/SC & cluster districts (Vaishali, Muzaffarpur, Patna rural, Bhagalpur); SHG route for collective units.</td></tr>
+      <tr><td>midh.gov.in</td><td>MIDH</td><td>40–50% back-ended subsidy, up to ~₹12 lakh/unit (₹30 lakh ceiling); 90% on kits for some categories.</td></tr>
+      <tr><td>nhb.gov.in</td><td>NHB credit-linked subsidy</td><td>40% capital subsidy (50% SC/ST) on farm infrastructure & automation via DPR + bank.</td></tr>
+      <tr><td>myscheme.gov.in (MKVB)</td><td>Mushroom Kit Vitaran</td><td>Subsidised kits + training for sustainable livelihood.</td></tr>
+      <tr><td>kviconline.gov.in</td><td>PMEGP</td><td>Bank credit + 15–35% margin money subsidy for larger units.</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Market, Export & Compliance</h3>
+    <table>
+      <tr><th>Portal / Body</th><th>Purpose</th></tr>
+      <tr><td>dgft.gov.in</td><td>IEC (Import-Export Code) — free, online, lifetime validity.</td></tr>
+      <tr><td>fssai.gov.in</td><td>Food business licence — mandatory for selling to hotels.</td></tr>
+      <tr><td>apeda.gov.in</td><td>RCMC registration (₹5,000 + GST, 5 yrs) — buyer directories, trade fairs, export benefits.</td></tr>
+      <tr><td>PQMS / Plant Quarantine</td><td>Phytosanitary certificate per consignment (mandatory for Nepal export).</td></tr>
+      <tr><td>IndiaMART · TradeIndia · Freshline · Tridge</td><td>B2B marketplaces to reach HoReCa buyers.</td></tr>
+      <tr><td>BigBasket seller · Zomato Hyperpure</td><td>Retail/QSR distribution channels.</td></tr>
+    </table>
+    <div class="note"><b>Market reality:</b> India exported ~7,768 MT mushrooms worth US$16.16M in FY 2022–23. Nepal bought ~233 tonnes (~US$207K) — a real but small formal market, so treat Nepal as a van-and-border (Raxaul/Birgunj) business, and add <b>dried mushrooms</b> for shelf life and value.</div>
+  </div>
+</div>
+
+<!-- PAGE 2: BIHAR -->
+<div class="page" id="p2">
+  <h2>2 · Bihar Village Unit Plan (200 m² land)</h2>
+  <div class="card">
+    <h3>Why Bihar works</h3>
+    <ul>
+      <li>Structurally undersupplied market — production never kept pace with demand; weak local competition.</li>
+      <li>Near-free inputs: paddy/wheat straw abundant; labour among India's cheapest.</li>
+      <li>100-bag pilot costs ~₹30,000 in Bihar vs ~₹50,000 in NCR.</li>
+    </ul>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Species & Crop Calendar</h3>
+      <table>
+        <tr><th>Species</th><th>Season</th><th>Notes</th></tr>
+        <tr><td>Oyster (Dhingri)</td><td>Year-round workhorse</td><td>Paddy/wheat straw, forgiving, 20–30 day cycles, 1–1.5 kg per kg dry substrate.</td></tr>
+        <tr><td>Paddy straw mushroom</td><td>Jun–Sep heat/humidity</td><td>Near-zero-cost straw; strong eastern Bihar demand.</td></tr>
+        <tr><td>Button (Agaricus)</td><td>Phase 2 only</td><td>Needs composting + pasteurisation + casing — higher capex/skill.</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Infrastructure for 200 m²</h3>
+      <ul>
+        <li>~93–120 m² shed (thatched/bamboo, mud walls) with cross-ventilation & 80–85% humidity.</li>
+        <li>Multi-layer bamboo/wood racks to multiply growing area 3–4×.</li>
+        <li>Drum boiler / steam pasteurisation setup.</li>
+        <li>Spawn from DMR / BAU Sabour / KVK; polythene bags; hygrometer + thermometer.</li>
+        <li>Remaining land: compost yard, drying area, future expansion.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Phase Plan</h3>
+    <table>
+      <tr><th>Phase</th><th>Timing</th><th>Actions</th></tr>
+      <tr><td><b>1 · Subsidised entry</b></td><td>Month 0–3</td><td>KVK training; apply to District Horticulture Officer for Bihar scheme (50% DBT); 100–200 oyster bags.</td></tr>
+      <tr><td><b>2 · Scale</b></td><td>Month 4–12</td><td>Stack MIDH for expansion; add paddy-straw mushroom for summer; register FPO/SHG federation (NABARD unlock).</td></tr>
+      <tr><td><b>3 · Value addition</b></td><td>Month 10+</td><td>Solar dryer → dried oyster for Nepal + off-season sales; button feasibility study.</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Sales Channels (Bihar)</h3>
+    <ol>
+      <li><b>Patna hotels/restaurants</b> — Bailey Road & Boring Road corridors pay the highest direct-to-buyer prices.</li>
+      <li><b>Muzaffarpur, Bhagalpur, Gaya</b> mandis & retailers.</li>
+      <li><b>Eastern districts → Kolkata</b> overnight truck market (higher price tier).</li>
+      <li><b>Nepal border trade</b> — see Page 4.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- PAGE 3: BANGALORE -->
+<div class="page" id="p3">
+  <h2>3 · Bangalore Unit Plan</h2>
+  <div class="card">
+    <p><b>The opposite play:</b> high costs, huge premium HoReCa demand. Position as <b>fresh, local, chemical-free gourmet supplier</b>.</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Setup Steps</h3>
+      <ol>
+        <li><b>Training:</b> ICAR-IIHR Mushroom Lab (mushroom.iihr.res.in) — training + Ready-to-Fruit incubation facility. Jan batches prioritise out-of-state candidates. Alternatives: GKVK/UAS, ShroomGarten (Bommasandra).</li>
+        <li><b>Species:</b> oyster varieties, king oyster, shiitake, milky — exotics fetch ₹1,200–1,500/kg in premium markets vs commodity button.</li>
+        <li><b>Site:</b> peri-urban 300–500 bag unit (Hosur Road, Bommasandra, Devanahalli belt); humidity control (foggers) for summer.</li>
+        <li><b>Licences:</b> FSSAI + trade licence; GST at scale.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Sales Channels (Bangalore)</h3>
+      <ol>
+        <li><b>Direct B2B:</b> hotels on MG Road/UB City/Whitefield — walk in with samples + weekly supply commitment + WhatsApp ordering.</li>
+        <li><b>QSR distribution:</b> via distributors like Zomato Hyperpure, BigBasket seller program.</li>
+        <li><b>Cloud kitchens & chefs:</b> reliability over price; grow via chef referrals.</li>
+        <li><b>D2C:</b> subscription boxes, farmers' markets.</li>
+        <li><b>Phase 2 export:</b> IEC + APEDA RCMC → Nepal/UAE (dried).</li>
+      </ol>
+    </div>
+  </div>
+  <div class="note"><b>Certifications that win hotel contracts:</b> FSSAI first, then HACCP/ISO 22000 — premium buyers specifically demand these.</div>
+</div>
+
+<!-- PAGE 4: NEPAL & SALES -->
+<div class="page" id="p4">
+  <h2>4 · Nepal Export & Hotel/Food-Chain Sales Playbook</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Option A — Border trade (start here)</h3>
+      <ul>
+        <li>Use land customs stations: East Champaran → <b>Raxaul/Birgunj</b>, Sitamarhi/Madhubani → <b>Jaynagar</b>, Araria → <b>Jogbani</b>.</li>
+        <li>Kathmandu hotels/retailers source Indian vegetables heavily through Birgunj — get a local commission agent; no export paperwork at small volumes.</li>
+        <li>Fresh target: Birgunj–Kathmandu corridor (≤1 day transit).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Option B — Formal export (phase 2)</h3>
+      <ol>
+        <li><b>IEC</b> from DGFT (free, online, lifetime).</li>
+        <li><b>FSSAI licence.</b></li>
+        <li><b>APEDA RCMC</b> via DGFT e-RCMC portal (₹5,000 + GST, 5 yrs).</li>
+        <li><b>Phytosanitary certificate</b> (PQMS) per consignment at border/LCS.</li>
+        <li>GST + current account + AD code at bank.</li>
+        <li><b>Add dried mushrooms</b> (oyster/shiitake) for shelf life & higher value/kg.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Hotel / Food-Chain Sales Playbook</h3>
+    <table>
+      <tr><th>Element</th><th>Standard</th></tr>
+      <tr><td>Product</td><td>Consistent sizing, trimmed stems, food-grade punnets (200g/500g), harvested 2–3 days before full maturity.</td></tr>
+      <tr><td>Cold chain</td><td>Crates + ice gel packs; 2–4°C, shelf life 3–5 days.</td></tr>
+      <tr><td>Entry tactic</td><td>Free samples within 24h of harvest + rate card + fixed weekly commitment. Start with 5–10 kitchens.</td></tr>
+      <tr><td>Pricing</td><td>Slight discount to retail at volume; exotics at premium. HoReCa absorbs ~40% of metro mushroom volume.</td></tr>
+      <tr><td>Diversification</td><td>Never depend on one chain — hotels + QSR distributors + retail + export.</td></tr>
+    </table>
+  </div>
+  <div class="warn"><b>Reality check:</b> Nepal's formal imports from India are ~233 tonnes/year total. Good money for a border village unit, but it's a van-and-LCS business, not a container business.</div>
+</div>
+
+<!-- PAGE 5: CALENDAR -->
+<div class="page" id="p5">
+  <h2>5 · 12-Month Master Calendar</h2>
+  <div class="cal-grid">
+    <div class="cal-month"><h5>Month 1</h5>KVK training (Bihar) · Apply to District Horticulture Officer for subsidy · Register for ICAR-IIHR/DMR training (BLR) · Scout Bangalore site</div>
+    <div class="cal-month"><h5>Month 2</h5>Draft DPR for pilot unit · Submit subsidy pre-approval (both states) · Order spawn & bags · Build Bihar shed</div>
+    <div class="cal-month"><h5>Month 3</h5>First 100–200 oyster bags (Bihar) · FSSAI licence (BLR) · Set up 300–500 bag BLR unit</div>
+    <div class="cal-month"><h5>Month 4</h5>First harvests → Patna hotel sampling · BLR: sign first 5–10 HoReCa contracts · FPO/SHG registration (Bihar)</div>
+    <div class="cal-month"><h5>Month 5</h5>Stabilise yields · Bihar: mandi/retail relationships · BLR: launch D2C subscription</div>
+    <div class="cal-month"><h5>Month 6</h5>Add paddy-straw mushroom (summer window) · IEC application · Trial Nepal border consignments via agent</div>
+    <div class="cal-month"><h5>Month 7</h5>Scale Bihar to 500+ bags · BLR: add shiitake/milky via IIHR tech · GST registration</div>
+    <div class="cal-month"><h5>Month 8</h5>Nepal: phytosanitary process tested · Hotel contract expansion via chef referrals</div>
+    <div class="cal-month"><h5>Month 9</h5>Evaluate winter crop planning · Cost audit (use calculator, Page 8) · APEDA RCMC application</div>
+    <div class="cal-month"><h5>Month 10</h5>Solar dryer installed (Bihar) · First dried-mushroom batches for Nepal/off-season</div>
+    <div class="cal-month"><h5>Month 11</h5>Button mushroom feasibility study · Expand hotel base in both cities</div>
+    <div class="cal-month"><h5>Month 12</h5>Year-1 review vs calculator projections · Plan Year-2 expansion · HACCP/ISO roadmap</div>
+  </div>
+</div>
+
+<!-- PAGE 6: KANBAN -->
+<div class="page" id="p6">
+  <h2>6 · Kanban Board <small style="font-size:.75rem;color:var(--muted)">(drag cards between columns — saved automatically in this browser)</small></h2>
+  <div class="noprint" style="margin-bottom:14px; display:flex; gap:8px; flex-wrap:wrap;">
+    <input type="text" id="newTask" placeholder="New task…" style="flex:1; min-width:200px;">
+    <input type="text" id="newOwner" placeholder="Owner" style="width:130px;">
+    <select id="newCol" style="width:150px;"><option value="todo">To Do</option><option value="doing">In Progress</option><option value="done">Done</option></select>
+    <button class="btn" onclick="addCard()">+ Add Card</button>
+    <button class="btn ghost" onclick="resetBoard()">Reset Board</button>
+  </div>
+  <div class="kanban">
+    <div class="kcol todo" data-col="todo"><h4>📋 TO DO</h4><div class="klist"></div></div>
+    <div class="kcol doing" data-col="doing"><h4>🔨 IN PROGRESS</h4><div class="klist"></div></div>
+    <div class="kcol done" data-col="done"><h4>✅ DONE</h4><div class="klist"></div></div>
+  </div>
+</div>
+
+<!-- PAGE 7: TRACKER -->
+<div class="page" id="p7">
+  <h2>7 · Team Progress Tracker <small style="font-size:.75rem;color:var(--muted)">(edits save automatically in this browser)</small></h2>
+  <div class="noprint" style="margin:10px 0;">
+    <button class="btn" onclick="addRow()">+ Add Row</button>
+  </div>
+  <table id="tracker">
+    <tr><th style="width:26%">Task / Milestone</th><th style="width:14%">Owner</th><th style="width:12%">Due</th><th style="width:14%">Status</th><th style="width:12%">% Done</th><th>Notes</th><th class="noprint" style="width:5%"></th></tr>
+  </table>
+  <div class="note">Tip: open this file from the same browser on each team member's machine, or move it to a shared drive — the table structure and calculator are fully self-contained. For multi-user live editing, copy this table into Google Sheets.</div>
+</div>
+
+<!-- PAGE 8: CALCULATOR -->
+<div class="page" id="p8">
+  <h2>8 · Dynamic Profit Calculator <small style="font-size:.75rem;color:var(--muted)">(change any input — results update live)</small></h2>
+  <div class="card">
+    <h3>Scenario Presets</h3>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn ghost" onclick="preset('oyster')">Oyster — Bihar village (default)</button>
+      <button class="btn ghost" onclick="preset('psm')">Paddy Straw Mushroom — Bihar</button>
+      <button class="btn ghost" onclick="preset('button')">Button — Phase 2</button>
+    </div>
+  </div>
+  <div class="calc-grid">
+    <div class="card">
+      <h3>Inputs — Production</h3>
+      <div class="field"><label>Growing bags per cycle</label><div class="unit"><input type="number" id="bags" value="300" oninput="calc()"><span>bags</span></div></div>
+      <div class="field"><label>Substrate (dry straw) per bag</label><div class="unit"><input type="number" id="subBag" value="1" step="0.1" oninput="calc()"><span>kg</span></div></div>
+      <div class="field"><label>Straw cost</label><div class="unit"><input type="number" id="strawCost" value="6" oninput="calc()"><span>₹/kg</span></div></div>
+      <div class="field"><label>Spawn rate (% of substrate)</label><div class="unit"><input type="number" id="spawnRate" value="5" oninput="calc()"><span>%</span></div></div>
+      <div class="field"><label>Spawn price</label><div class="unit"><input type="number" id="spawnCost" value="120" oninput="calc()"><span>₹/kg</span></div></div>
+      <div class="field"><label>Bag + misc consumables per bag</label><div class="unit"><input type="number" id="bagCost" value="8" oninput="calc()"><span>₹/bag</span></div></div>
+      <div class="field"><label>Yield per bag (all flushes)</label><div class="unit"><input type="number" id="yieldBag" value="1.2" step="0.1" oninput="calc()"><span>kg</span></div></div>
+      <div class="field"><label>Cycles per year</label><div class="unit"><input type="number" id="cycles" value="10" oninput="calc()"><span>cycles</span></div></div>
+      <h3>Inputs — Sales & Overheads</h3>
+      <div class="field"><label>Average selling price (fresh)</label><div class="unit"><input type="number" id="price" value="150" oninput="calc()"><span>₹/kg</span></div></div>
+      <div class="field"><label>Share sold as dried (higher value)</label><div class="unit"><input type="number" id="driedPct" value="0" oninput="calc()"><span>%</span></div></div>
+      <div class="field"><label>Dried price (₹/kg dried)</label><div class="unit"><input type="number" id="driedPrice" value="900" oninput="calc()"><span>₹/kg</span></div></div>
+      <div class="field"><label>Fresh→dried ratio (kg fresh per kg dried)</label><div class="unit"><input type="number" id="dryRatio" value="8" oninput="calc()"><span>: 1</span></div></div>
+      <div class="field"><label>Labour per cycle</label><div class="unit"><input type="number" id="labour" value="4000" oninput="calc()"><span>₹/cycle</span></div></div>
+      <div class="field"><label>Utilities (power/water) per cycle</label><div class="unit"><input type="number" id="util" value="1500" oninput="calc()"><span>₹/cycle</span></div></div>
+      <div class="field"><label>Transport/packaging per cycle</label><div class="unit"><input type="number" id="trans" value="2000" oninput="calc()"><span>₹/cycle</span></div></div>
+      <div class="field"><label>Fixed overheads per month (rent, admin, misc)</label><div class="unit"><input type="number" id="fixed" value="3000" oninput="calc()"><span>₹/month</span></div></div>
+      <div class="field"><label>Annual capex & maintenance</label><div class="unit"><input type="number" id="capex" value="30000" oninput="calc()"><span>₹/yr</span></div></div>
+    </div>
+    <div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="v" id="kRev">–</div><div class="l">Annual Revenue</div></div>
+        <div class="kpi"><div class="v" id="kCost">–</div><div class="l">Annual Cost</div></div>
+        <div class="kpi"><div class="v" id="kProfit">–</div><div class="l">Annual Net Profit</div></div>
+        <div class="kpi"><div class="v" id="kMargin">–</div><div class="l">Net Margin</div></div>
+      </div>
+      <div class="card">
+        <h3>Per-Cycle Breakdown</h3>
+        <div class="out"><span>Fresh production</span><b id="oProd">–</b></div>
+        <div class="out"><span>Revenue / cycle</span><b id="oRevC">–</b></div>
+        <div class="out"><span>Variable cost / cycle (substrate+spawn+bags+labour+utils+transport)</span><b id="oVarC">–</b></div>
+        <div class="out"><span>Contribution / cycle</span><b id="oContrib">–</b></div>
+      </div>
+      <div class="card">
+        <h3>Annual Breakdown</h3>
+        <div class="out"><span>Variable costs</span><b id="oVarY">–</b></div>
+        <div class="out"><span>Fixed overheads (12 months)</span><b id="oFixY">–</b></div>
+        <div class="out"><span>Capex & maintenance</span><b id="oCapY">–</b></div>
+        <div class="out"><span>Total cost</span><b id="oTotY">–</b></div>
+        <div class="out"><span><b>NET PROFIT</b></span><b class="big" id="oNet">–</b></div>
+        <div class="out"><span>Break-even selling price</span><b id="oBE">–</b></div>
+        <div class="out"><span>Profit per kg (net, after capex)</span><b id="oPerKg">–</b></div>
+        <div class="out"><span>Return on cost</span><b id="oROI">–</b></div>
+      </div>
+      <div class="card">
+        <h3>Scenario Comparison (edit inputs above, click presets to compare)</h3>
+        <div class="out"><span>Monthly average profit</span><b id="oMonthly">–</b></div>
+        <div class="out"><span>Payback on capex (months)</span><b id="oPayback">–</b></div>
+        <div class="note">Default preset = oyster on 200 m² land: ~300 bags/cycle on multi-layer racks, 10 cycles/yr. Subsidy (50% DBT Bihar scheme) applied on capex would roughly halve the payback period shown.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Self-contained planning document · Kanban & tracker data persist in browser localStorage · Print-friendly (each page prints separately)</footer>
+
+<script>
+/* ---------- Tabs ---------- */
+document.querySelectorAll('#tabs button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.p).classList.add('active');
+    window.scrollTo(0,0);
+  };
+});
+
+/* ---------- Calculator ---------- */
+function preset(n){
+  const P={
+    oyster:{bags:300,subBag:1,strawCost:6,spawnRate:5,spawnCost:120,bagCost:8,yieldBag:1.2,cycles:10,price:150,driedPct:0,driedPrice:900,dryRatio:8,labour:4000,util:1500,trans:2000,fixed:3000,capex:30000},
+    psm:{bags:300,subBag:1.2,strawCost:4,spawnRate:4,spawnCost:140,bagCost:8,yieldBag:0.9,cycles:4,price:180,driedPct:0,driedPrice:900,dryRatio:8,labour:3000,util:800,trans:1500,fixed:3000,capex:25000},
+    button:{bags:1000,subBag:4,strawCost:8,spawnRate:1.5,spawnCost:90,bagCost:12,yieldBag:3,cycles:4,price:110,driedPct:0,driedPrice:700,dryRatio:10,labour:25000,util:12000,trans:8000,fixed:8000,capex:600000}
+  }[n];
+  for(const k in P){document.getElementById(k).value=P[k];}
+  calc();
+}
+const fmt=x=>'₹'+Math.round(x).toLocaleString('en-IN');
+function calc(){
+  const g=id=>parseFloat(document.getElementById(id).value)||0;
+  const prod=g('bags')*g('yieldBag');                       // kg fresh per cycle
+  const dp=Math.min(Math.max(g('driedPct'),0),100)/100;
+  const freshKg=prod*(1-dp), driedKg=prod*dp/g('dryRatio');
+  const revC=freshKg*g('price')+driedKg*g('driedPrice');
+  const straw=g('bags')*g('subBag')*g('strawCost');
+  const spawn=g('bags')*g('subBag')*(g('spawnRate')/100)*g('spawnCost');
+  const bags=g('bags')*g('bagCost');
+  const varC=straw+spawn+bags+g('labour')+g('util')+g('trans');
+  const fixY=g('fixed')*12, capY=g('capex');
+  const revY=revC*g('cycles'), varY=varC*g('cycles');
+  const totY=varY+fixY+capY, net=revY-totY;
+  const margin=revY>0?net/revY*100:0;
+  const be=prod>0?varC/prod:0;
+  const perKg=prod*g('cycles')>0?net/(prod*g('cycles')):0;
+  const roi=totY>0?net/totY*100:0;
+  const monthly=net/12;
+  const payback=net>0?(capY/(net/12)):Infinity;
+  const set=(id,v)=>document.getElementById(id).textContent=v;
+  set('oProd',prod.toFixed(1)+' kg'); set('oRevC',fmt(revC)); set('oVarC',fmt(varC));
+  const cb=document.getElementById('oContrib'); cb.textContent=fmt(revC-varC); cb.className=revC-varC>=0?'pos':'neg';
+  set('kRev',fmt(revY)); set('kCost',fmt(totY));
+  const kp=document.getElementById('kProfit'); kp.textContent=fmt(net); kp.className=net>=0?'v pos':'v neg';
+  const km=document.getElementById('kMargin'); km.textContent=margin.toFixed(1)+'%'; km.className=margin>=0?'v pos':'v neg';
+  set('oVarY',fmt(varY)); set('oFixY',fmt(fixY)); set('oCapY',fmt(capY)); set('oTotY',fmt(totY));
+  const on=document.getElementById('oNet'); on.textContent=fmt(net); on.className='big '+(net>=0?'pos':'neg');
+  set('oBE','₹'+be.toFixed(0)+'/kg'); set('oPerKg','₹'+perKg.toFixed(0)+'/kg');
+  set('oROI',roi.toFixed(0)+'%'); set('oMonthly',fmt(monthly));
+  set('oPayback',isFinite(payback)?payback.toFixed(1)+' months':'–');
+}
+
+/* ---------- Kanban ---------- */
+const defaultBoard=[
+  {t:'Enroll in KVK mushroom training (Bihar)',o:'Team lead',c:'todo'},
+  {t:'Apply: Bihar Mushroom Development Scheme (DHO office)',o:'',c:'todo'},
+  {t:'Draft DPR for 200 m² pilot unit',o:'',c:'todo'},
+  {t:'Book ICAR-IIHR / DMR Solan training slot',o:'',c:'doing'},
+  {t:'Scout Bangalore peri-urban site (Hosur Rd / Devanahalli)',o:'',c:'doing'},
+  {t:'FSSAI licence application (BLR unit)',o:'',c:'done'},
+];
+let board=JSON.parse(localStorage.getItem('mushBoard')||'null')||defaultBoard.slice();
+function saveBoard(){localStorage.setItem('mushBoard',JSON.stringify(board));}
+function renderBoard(){
+  document.querySelectorAll('.klist').forEach(l=>l.innerHTML='');
+  board.forEach((cd,i)=>{
+    const el=document.createElement('div'); el.className='kcard'; el.draggable=true; el.dataset.i=i;
+    el.innerHTML=`${cd.t}${cd.o?`<small>👤 ${cd.o}</small>`:''} <button class="btn danger noprint" style="float:right;" onclick="delCard(${i})">✕</button>`;
+    el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i); el.classList.add('dragging');});
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+    document.querySelector(`.kcol.${cd.c} .klist`).appendChild(el);
+  });
+}
+document.querySelectorAll('.kcol').forEach(col=>{
+  col.addEventListener('dragover',e=>e.preventDefault());
+  col.addEventListener('drop',e=>{
+    e.preventDefault(); const i=+e.dataTransfer.getData('text/plain');
+    board[i].c=col.dataset.col; saveBoard(); renderBoard();
+  });
+});
+function addCard(){
+  const t=document.getElementById('newTask').value.trim(); if(!t)return;
+  board.push({t,o:document.getElementById('newOwner').value.trim(),c:document.getElementById('newCol').value});
+  document.getElementById('newTask').value=''; saveBoard(); renderBoard();
+}
+function delCard(i){board.splice(i,1); saveBoard(); renderBoard();}
+function resetBoard(){if(confirm('Reset board to defaults?')){board=defaultBoard.slice(); saveBoard(); renderBoard();}}
+
+/* ---------- Tracker ---------- */
+const defaultRows=[
+  ['KVK / RPCAU Pusa training completed','','','Not started',0,''],
+  ['Bihar subsidy application submitted','','','Not started',0,''],
+  ['Shed construction on 200 m² site','','','Not started',0,''],
+  ['Spawn supplier finalised (DMR/BAU/KVK)','','','Not started',0,''],
+  ['First 100-bag oyster crop (Bihar)','','','Not started',0,''],
+  ['ICAR-IIHR training (BLR member)','','','Not started',0,''],
+  ['FSSAI licence (BLR)','','','Not started',0,''],
+  ['First 5 hotel contracts signed','','','Not started',0,''],
+  ['IEC + GST registration','','','Not started',0,''],
+  ['Trial Nepal consignment (via agent)','','','Not started',0,''],
+  ['Solar dryer installed (dried products)','','','Not started',0,''],
+  ['APEDA RCMC application','','','Not started',0,''],
+];
+let rows=JSON.parse(localStorage.getItem('mushRows')||'null')||defaultRows.slice();
+function saveRows(){localStorage.setItem('mushRows',JSON.stringify(rows));}
+function renderRows(){
+  const tbl=document.getElementById('tracker');
+  tbl.querySelectorAll('tr.data').forEach(r=>r.remove());
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr'); tr.className='data';
+    const scls=r[3]==='Done'?'status-c':(r[3]==='In progress'?'status-p':'status-s');
+    tr.innerHTML=`
+      <td><input type="text" value="${r[0].replace(/"/g,'&quot;')}" onchange="upd(${i},0,this.value)"></td>
+      <td><input type="text" value="${r[1].replace(/"/g,'&quot;')}" onchange="upd(${i},1,this.value)"></td>
+      <td><input type="date" value="${r[2]}" onchange="upd(${i},2,this.value)"></td>
+      <td class="${scls}"><select onchange="upd(${i},3,this.value)">
+        ${['Not started','In progress','Done','Blocked'].map(s=>`<option ${s===r[3]?'selected':''}>${s}</option>`).join('')}
+      </select></td>
+      <td><input type="number" min="0" max="100" value="${r[4]}" onchange="upd(${i},4,this.value)"></td>
+      <td><input type="text" value="${r[5].replace(/"/g,'&quot;')}" onchange="upd(${i},5,this.value)"></td>
+      <td class="noprint"><button class="btn danger" onclick="delRow(${i})">✕</button></td>`;
+    tbl.appendChild(tr);
+  });
+}
+function upd(i,j,v){rows[i][j]=v; saveRows(); renderRows();}
+function addRow(){rows.push(['','','','Not started',0,'']); saveRows(); renderRows();}
+function delRow(i){rows.splice(i,1); saveRows(); renderRows();}
+
+renderBoard(); renderRows(); calc();
+</script>
+</body>
+</html>
